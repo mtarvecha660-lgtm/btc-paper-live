@@ -37,7 +37,7 @@
 
     const ranked = [...data.accounts].sort((a, b) => b.pnl_pct - a.pnl_pct);
     $("cards").innerHTML = data.accounts.map((a, i) => {
-      const rank = ranked.findIndex((x) => x.id === a.id) + 1;
+      const rank = 1 + data.accounts.filter((x) => x.pnl_pct > a.pnl_pct + 1e-9).length;
       const p = a.position;
       const posTxt = p
         ? `LONG ${p.btc.toFixed(5)} BTC @ $${usd(p.entry, 0)}` + (p.stop ? ` · stop $${usd(p.stop, 0)}` : "") +
