@@ -88,7 +88,7 @@ Run it on your own laptop instead: `setup_windows.bat` then `python live/tick.py
 ## Costs and limits
 
 - Free: GitHub Actions is free for public repos, and Pages is free.
-- GitHub can start scheduled runs late (sometimes 5 to 30+ minutes under load). Fills still use the right candle's open, so late runs don't change the results much.
+- GitHub can start scheduled runs late (sometimes 5 to 30+ minutes under load), and for a brand-new repo its schedule can take hours to start. So the workflow has a **backup ticker**: if no scheduled run has happened in the last 40 minutes, each run waits until ~14 minutes after it began and starts the next one itself. Once GitHub's schedule is running, the backup does nothing. Fills still use the right candle's open, so late runs don't change results much.
 - The repo is public, so anyone with the link can see the paper results. There are no secrets in it.
 
 ## Safety
