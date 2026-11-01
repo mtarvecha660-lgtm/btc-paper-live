@@ -1,0 +1,195 @@
+{
+ "mode": "PAPER TRADING - virtual money only",
+ "generated_utc": "2026-11-01 09:08:51",
+ "last_tick": {
+  "time_utc": "2026-11-01 09:08:51",
+  "status": "ok",
+  "btc_price": "78209.83",
+  "source": "binance_vision",
+  "note": ""
+ },
+ "recent_ticks": [
+  {
+   "time_utc": "2026-11-01 09:08:51",
+   "status": "ok",
+   "btc_price": "78209.83",
+   "source": "binance_vision",
+   "note": ""
+  }
+ ],
+ "ticks_ok_24h": 1,
+ "ticks_24h": 1,
+ "btc_price": 78209.83,
+ "price_source": "binance_vision",
+ "inr_per_usdt": 94.86,
+ "meta": {
+  "mode": "PAPER (virtual money)",
+  "started": "2026-11-01 09:08:46",
+  "start_inr": 500000,
+  "inr_per_usdt_at_start": 94.86,
+  "inr_rate_source": "coingecko",
+  "start_usdt": 5270.9256,
+  "timeframe": "1h",
+  "fee_pct": 0.1,
+  "slippage_pct": 0.05,
+  "risk_per_trade_pct": 1.0,
+  "max_position_pct": 50,
+  "daily_loss_limit_pct": 3.0
+ },
+ "timeframe": "1h",
+ "accounts": [
+  {
+   "id": "ema_cross",
+   "label": "EMA Crossover",
+   "why": "Trend following: buys when the 20-hour average crosses above the 100-hour one.",
+   "strategy": "ema_cross",
+   "params": {
+    "fast": 20,
+    "slow": 100,
+    "trend": 200,
+    "atr_period": 14,
+    "atr_mult": 2.0
+   },
+   "started": "2026-11-01T09:08:47+00:00",
+   "equity_usdt": 5270.9256,
+   "equity_inr": 500000.00241599994,
+   "pnl_pct": 0.0,
+   "cash_usdt": 5270.9256,
+   "fees_usdt": 0.0,
+   "realized_usdt": 0.0,
+   "position": null,
+   "pending": null,
+   "halted": false,
+   "trades": 0,
+   "last_trade": null,
+   "last_action": {
+    "time": "2026-11-01 09:00:00",
+    "action": "WAIT",
+    "price": 78284.98,
+    "reason": "ema20=77779.0 ema100=78529.0 trend=79430.0",
+    "plain": "Waiting. The 20h average ($77,779) is below the 100h average ($78,529). Buys when it crosses above, if price is over the 200h trend ($79,430)."
+   },
+   "decisions": 1
+  },
+  {
+   "id": "rsi_meanrev",
+   "label": "RSI Dip-Buyer",
+   "why": "Mean reversion: buys sharp dips (RSI under 35), sells on the bounce.",
+   "strategy": "rsi_meanrev",
+   "params": {
+    "rsi_period": 14,
+    "low": 35,
+    "exit_rsi": 50,
+    "trend": 200,
+    "atr_period": 14,
+    "atr_mult": 2.5
+   },
+   "started": "2026-11-01T09:08:48+00:00",
+   "equity_usdt": 5270.9256,
+   "equity_inr": 500000.00241599994,
+   "pnl_pct": 0.0,
+   "cash_usdt": 5270.9256,
+   "fees_usdt": 0.0,
+   "realized_usdt": 0.0,
+   "position": null,
+   "pending": null,
+   "halted": false,
+   "trades": 0,
+   "last_trade": null,
+   "last_action": {
+    "time": "2026-11-01 09:00:00",
+    "action": "WAIT",
+    "price": 78284.98,
+    "reason": "exit condition true but nothing to sell | RSI above 50 (bounce done) | rsi=68.9 trend=79430.0",
+    "plain": "Waiting for a dip. RSI is 69; it buys when RSI falls below 35."
+   },
+   "decisions": 1
+  },
+  {
+   "id": "donchian_breakout",
+   "label": "Donchian Breakout",
+   "why": "Breakout: buys a new 100-hour high, exits on a 10-hour low.",
+   "strategy": "donchian_breakout",
+   "params": {
+    "entry_n": 100,
+    "exit_n": 10,
+    "atr_period": 20,
+    "atr_mult": 2.0
+   },
+   "started": "2026-11-01T09:08:50+00:00",
+   "equity_usdt": 5270.9256,
+   "equity_inr": 500000.00241599994,
+   "pnl_pct": 0.0,
+   "cash_usdt": 5270.9256,
+   "fees_usdt": 0.0,
+   "realized_usdt": 0.0,
+   "position": null,
+   "pending": null,
+   "halted": false,
+   "trades": 0,
+   "last_trade": null,
+   "last_action": {
+    "time": "2026-11-01 09:00:00",
+    "action": "WAIT",
+    "price": 78284.98,
+    "reason": "hi100=81971.0 lo10=77515.0",
+    "plain": "Waiting for a breakout above the 100h high ($81,971)."
+   },
+   "decisions": 1
+  },
+  {
+   "id": "hold_btc",
+   "label": "Just Hold BTC",
+   "why": "Benchmark: buys BTC once with all its money at the start and never sells.",
+   "strategy": "HOLD",
+   "params": {},
+   "started": "2026-11-01 09:08:51",
+   "equity_usdt": 5263.028425847017,
+   "equity_inr": 499250.8764758481,
+   "pnl_pct": -0.14982518730641825,
+   "cash_usdt": 0.0,
+   "fees_usdt": 5.2656599400599395,
+   "realized_usdt": 0.0,
+   "position": {
+    "btc": 0.06729369474204223,
+    "entry": 78248.93491499999,
+    "stop": null,
+    "value_usdt": 5263.028425847017,
+    "unrealized_pct": -0.04997501249374148
+   },
+   "pending": null,
+   "halted": false,
+   "trades": 1,
+   "last_trade": {
+    "time": "2026-11-01 09:08:51",
+    "side": "BUY",
+    "price": 78248.93491499999,
+    "reason": "Benchmark: buy BTC once with all the money and hold it, never sell"
+   },
+   "last_action": {
+    "time": "2026-11-01 09:08:51",
+    "action": "BUY",
+    "price": 78248.93491499999,
+    "reason": "Benchmark: bought once with all the money; it only holds from here",
+    "plain": "Benchmark: bought once with all the money; it only holds from here"
+   },
+   "decisions": 1
+  }
+ ],
+ "recent_trades": [
+  {
+   "time": "2026-11-01 09:08:51",
+   "account": "Just Hold BTC",
+   "id": "hold_btc",
+   "side": "BUY",
+   "price": 78248.93491499999,
+   "qty": 0.06729369474204223,
+   "value": 5265.65994005994,
+   "fee": 5.2656599400599395,
+   "pnl": null,
+   "return_pct": null,
+   "reason": "Benchmark: buy BTC once with all the money and hold it, never sell"
+  }
+ ],
+ "trade_count": 1
+}
