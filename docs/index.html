@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BTC Paper Trading · Live</title>
+<meta name="description" content="A 24/7 Bitcoin paper-trading bot: 3 strategies vs just holding BTC, with virtual money.">
+<meta property="og:title" content="BTC Paper Trading · Live">
+<meta property="og:description" content="3 strategies vs just holding BTC, ₹5 lakh virtual each. Paper money only.">
+<meta name="theme-color" content="#f6f5f1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>₿</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="banner" role="note"><strong>PAPER TRADING</strong> · virtual money only, no real money is used</div>
+<main>
+  <header class="top">
+    <div>
+      <h1>BTC Paper Bot</h1>
+      <p class="sub">3 strategies race “just hold BTC”, each starting with <b>₹5,00,000</b> virtual</p>
+    </div>
+  </header>
+
+  <section class="pricebar" aria-live="polite">
+    <div class="price"><span class="lbl">BTC</span> <span id="btc">…</span></div>
+    <div class="upd"><span id="dot" class="dot"></span><span id="updated">loading…</span></div>
+  </section>
+
+  <section id="cards" class="cards"></section>
+
+  <section class="panel">
+    <div class="panel-h">
+      <h2>Account value</h2>
+      <span class="hint" id="charthint">₹, since start</span>
+    </div>
+    <div class="chartwrap"><canvas id="chart" aria-label="Equity of each account over time"></canvas></div>
+    <div id="legend" class="legend"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-h"><h2>Recent trades</h2><span class="hint" id="tradecount"></span></div>
+    <div id="trades" class="trades"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-h"><h2>Bot runs</h2><span class="hint" id="tickhint"></span></div>
+    <div id="ticks" class="ticks"></div>
+  </section>
+
+  <section class="panel about">
+    <h2>How it works</h2>
+    <ul>
+      <li>Every ~15 minutes GitHub runs the bot for free. It reads public BTC prices (no exchange account, no keys).</li>
+      <li>Strategies decide on each closed <b>1-hour</b> candle and “fill” at the next candle’s open, paying a 0.1% fee + 0.05% slippage, like a real exchange.</li>
+      <li>Risk rules: 1% of the account risked per trade, max 50% in one trade, a stop-loss on every trade, trading pauses for the day after a 3% loss. No leverage, no shorting.</li>
+      <li>“Just Hold BTC” buys once at the start and never sells. A strategy is only worth anything if it beats that over weeks.</li>
+      <li id="ratenote"></li>
+    </ul>
+    <p class="fine">Past or paper results don’t predict real results. Not financial advice. <a id="repolink" href="https://github.com/mtarvecha660-lgtm/btc-paper-live">Code & raw data on GitHub</a></p>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

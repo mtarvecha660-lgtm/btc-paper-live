@@ -1,0 +1,47 @@
+{
+  "_note": "The paper accounts the bot runs. PAPER ONLY: virtual money, public price data, no exchange keys. Change a strategy's params here (or add an account) and the next run picks it up. A brand-new id starts a fresh account; changing params of an existing id keeps its balance and history.",
+  "start_inr": 500000,
+  "timeframe": "1h",
+  "accounts": [
+    {
+      "id": "ema_cross",
+      "label": "EMA Crossover",
+      "strategy": "ema_cross",
+      "params": {
+        "fast": 20,
+        "slow": 100,
+        "atr_mult": 2.0
+      },
+      "why": "Trend following: buys when the 20-hour average crosses above the 100-hour one."
+    },
+    {
+      "id": "rsi_meanrev",
+      "label": "RSI Dip-Buyer",
+      "strategy": "rsi_meanrev",
+      "params": {
+        "low": 35,
+        "exit_rsi": 50,
+        "atr_mult": 2.5
+      },
+      "why": "Mean reversion: buys sharp dips (RSI under 35), sells on the bounce."
+    },
+    {
+      "id": "donchian_breakout",
+      "label": "Donchian Breakout",
+      "strategy": "donchian_breakout",
+      "params": {
+        "entry_n": 100,
+        "exit_n": 10,
+        "atr_mult": 2.0
+      },
+      "why": "Breakout: buys a new 100-hour high, exits on a 10-hour low."
+    },
+    {
+      "id": "hold_btc",
+      "label": "Just Hold BTC",
+      "strategy": "HOLD",
+      "params": {},
+      "why": "Benchmark: buys BTC once with all its money at the start and never sells."
+    }
+  ]
+}
