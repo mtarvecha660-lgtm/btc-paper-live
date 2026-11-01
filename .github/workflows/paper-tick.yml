@@ -85,23 +85,22 @@ jobs:
         continue-on-error: true   # a dashboard hiccup never fails the tick
         uses: actions/deploy-pages@v5
 
-      # Backup ticker. GitHub's cron can start late or skip runs, and for a brand-new repo it can take
-      # hours to start at all. If no scheduled run has happened in the last 40 minutes, this step waits
-      # until ~14 minutes after this run began and starts the next run itself. Once GitHub's own schedule
-      # is running, this step does nothing.
-      - name: Backup ticker (only while GitHub's schedule is silent)
+      # Backup ticker. GitHub's cron is unreliable on this repo (it fired once in a day, and a single cron run
+      # used to switch this backup off, which stopped the bot for hours on 2026-11-01 from 16:20 UTC).
+      # Rule now: about 14 minutes after this run began, if no other run of this workflow has been created
+      # since this run started (by cron or anyone), start the next run. Never relies on the cron.
+      - name: Backup ticker (keeps the chain alive whatever GitHub's cron does)
         if: always()
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          THIS_RUN: ${{ github.run_id }}
         run: |
-          last=$(gh run list -R "$GITHUB_REPOSITORY" --workflow paper-tick.yml --event schedule --limit 1 --json createdAt -q '.[0].createdAt' 2>/dev/null || true)
-          if [ -n "$last" ] && [ $(( $(date +%s) - $(date -d "$last" +%s) )) -lt 2400 ]; then
-            echo "GitHub's schedule is running (last scheduled run $last); no backup needed"; exit 0
-          fi
-          waiting=$(gh run list -R "$GITHUB_REPOSITORY" --workflow paper-tick.yml --status queued --json databaseId -q 'length' 2>/dev/null || echo 0)
-          if [ "${waiting:-0}" != "0" ]; then echo "a run is already queued; no backup needed"; exit 0; fi
           wait_s=$(( 14 * 60 - ( $(date +%s) - TICK_START ) ))
           if [ "$wait_s" -gt 0 ]; then echo "waiting ${wait_s}s"; sleep "$wait_s"; fi
+          since=$(date -u -d "@$TICK_START" +%Y-%m-%dT%H:%M:%SZ)
+          newer=$(gh run list -R "$GITHUB_REPOSITORY" --workflow paper-tick.yml --limit 10 --json databaseId,createdAt,status \
+            -q "[.[] | select(.databaseId != ${THIS_RUN}) | select(.createdAt > \"${since}\") | select(.status != \"completed\")] | length" 2>/dev/null || echo 0)
+          if [ "${newer:-0}" != "0" ]; then echo "another run is already queued or running; no backup needed"; exit 0; fi
           gh workflow run paper-tick.yml -R "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME"
           echo "started the next run"
