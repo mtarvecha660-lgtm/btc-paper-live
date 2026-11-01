@@ -1,5 +1,6 @@
 (() => {
-  const COLORS = { ema_cross: "#2f5d8a", rsi_meanrev: "#c06a2b", donchian_breakout: "#7a5aa6", hold_btc: "#6b7280" };
+  const COLORS = { ema_cross: "#2f5d8a", rsi_meanrev: "#c06a2b", donchian_breakout: "#7a5aa6", hold_btc: "#6b7280",
+    v2_trend_sma: "#1f7a6d", v2_bb_squeeze: "#b04a6a", v2_tsmom: "#8a6d1f", v2_dca_weekly: "#9ca3af" };
   const FALLBACK = ["#2f5d8a", "#c06a2b", "#7a5aa6", "#3b8f8f", "#a8556f"];
   const colorOf = (id, i) => COLORS[id] || FALLBACK[i % FALLBACK.length];
   const $ = (id) => document.getElementById(id);
@@ -43,8 +44,8 @@
     const m = a.metrics || {}, rate = data.inr_per_usdt;
     const money = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + inr(Math.abs(v) * rate);
     const parts = [];
-    if (a.excess_vs_hold_pct != null) parts.push(`vs Hold <b class="${cls(a.excess_vs_hold_pct)}">${pct(a.excess_vs_hold_pct)}</b>`);
-    if (a.strategy !== "HOLD") {
+    if (a.excess_vs_hold_pct != null) parts.push(`vs Hold (same dates) <b class="${cls(a.excess_vs_hold_pct)}">${pct(a.excess_vs_hold_pct)}</b>`);
+    if (a.strategy !== "HOLD" && a.strategy !== "DCA") {
       if (m.closed_trades) {
         parts.push(`Profit factor <b>${m.profit_factor_inf ? "∞" : m.profit_factor.toFixed(2)}</b>`);
         parts.push(`Expectancy <b>${money(m.expectancy_usdt)}</b>/trade`);
@@ -75,8 +76,11 @@
     renderClock();
 
     const ranked = [...data.accounts].sort((a, b) => b.pnl_pct - a.pnl_pct);
-    $("cards").innerHTML = data.accounts.map((a, i) => {
-      const rank = 1 + data.accounts.filter((x) => x.pnl_pct > a.pnl_pct + 1e-9).length;
+    const groups = [["v1", "Original 3 vs Just Hold BTC"], ["v2", "V2: passed the 2022-26 regime test"]];
+    const hasV2 = data.accounts.some((a) => a.group === "v2");
+    $("cards").innerHTML = groups.filter(([g]) => g === "v1" || hasV2).map(([g, title]) =>
+      (hasV2 ? `<div class="group-h">${title}</div>` : "") + `<div class="cards">` + data.accounts.map((a, i) => [a, i]).filter(([a]) => (a.group || "v1") === g).map(([a, i]) => {
+      const rank = 1 + data.accounts.filter((x) => (x.group || "v1") === (a.group || "v1") && x.pnl_pct > a.pnl_pct + 1e-9).length;
       const p = a.position;
       const posTxt = p
         ? `LONG ${p.btc.toFixed(5)} BTC @ $${usd(p.entry, 0)}` + (p.stop ? ` · stop $${usd(p.stop, 0)}` : "") +
@@ -84,10 +88,12 @@
         : "No position (all cash)";
       const la = a.last_action;
       const lt = a.last_trade;
-      const action = la ? `<span class="tag ${esc(la.action)}">${esc(la.action)}</span>${ist(la.time)} IST` : "waiting for the first hourly candle";
-      return `<article class="card ${a.id === "hold_btc" ? "hold" : ""}">
+      const ACT = { BUY_NEXT_OPEN: ["BUY", "BUY"], SELL_NEXT_OPEN: ["SELL", "SELL"], HALT: ["PAUSED", "STOP"], HALTED: ["PAUSED", "STOP"] };
+      const [albl, acls] = la ? (ACT[la.action] || [la.action, la.action]) : [];
+      const action = la ? `<span class="tag ${esc(acls)}">${esc(albl)}</span>${ist(la.time)} IST` : "waiting for the first candle";
+      return `<article class="card ${a.strategy === "HOLD" || a.strategy === "DCA" ? "hold" : ""}">
         <span class="rank">#${rank}</span>
-        <div class="row1"><div class="name"><span class="swatch" style="background:${colorOf(a.id, i)}"></span>${esc(a.label)}</div>
+        <div class="row1"><div class="name"><span class="swatch" style="background:${colorOf(a.id, i)}"></span>${esc(a.label)}${a.badge ? `<span class="badge">${esc(a.badge)}</span>` : ""}</div>
           <span class="pill ${cls(a.pnl_pct)}">${pct(a.pnl_pct)}</span></div>
         <div class="why">${esc(a.why)}</div>
         <div class="eq">${inr(a.equity_inr)}<small>${usd(a.equity_usdt)} USDT</small></div>
@@ -98,8 +104,9 @@
         </dl>
         ${la ? `<div class="reason">${esc(la.plain || la.reason)}</div>` : ""}
         ${metricsRow(a)}
+        ${a.group === "v2" && a.started ? `<div class="reason">Started ${ist(a.started)} IST · ${a.strategy === "DCA" ? "weekly buys" : esc(a.tf || "") + " candles"}</div>` : ""}
       </article>`;
-    }).join("");
+    }).join("") + `</div>`).join("") + (hasV2 ? `<a class="v2link" href="v2.html"><b>See the V2 test →</b> how 8 strategies did in the 2022 bear, 2023-24 bull, 2025 range and the last 6 months</a>` : "");
 
     // chart: every account starts at the same ₹ value, then one point per closed candle, then "now"
     const start = data.meta && data.meta.started;
@@ -116,7 +123,7 @@
       pts.push({ x: nowT, y: a.equity_inr });
       return {
         label: a.label, data: pts, borderColor: colorOf(a.id, i), backgroundColor: colorOf(a.id, i),
-        borderWidth: a.id === "hold_btc" ? 2 : 2.2, borderDash: a.id === "hold_btc" ? [6, 4] : [],
+        borderWidth: a.strategy === "HOLD" ? 2 : 2.2, borderDash: a.strategy === "HOLD" ? [6, 4] : a.strategy === "DCA" ? [2, 3] : [],
         pointRadius: 0, pointHitRadius: 8, tension: 0.15,
       };
     });

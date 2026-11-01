@@ -13,14 +13,33 @@ Three trading strategies race against simply holding Bitcoin. Each account start
 | Donchian Breakout | Buys when price breaks the 100-hour high, sells on a 10-hour low. |
 | Just Hold BTC | Benchmark: buys once with everything at the start and never sells. |
 
-The strategy settings are the 1-hour versions that did least badly in the 180-day backtests (`results.md`). Honest note: **in those backtests none of them beat just holding BTC.** That is what this live paper run is for: see how they behave on prices nobody has seen yet.
+**V2 accounts (added after a multi-year regime test, see below):**
+
+| Account | What it does |
+|---|---|
+| Trend Filter (100-day SMA) | Holds BTC fully while the last daily close is above its 100-day average, else cash (4h candles). |
+| Bollinger Squeeze (4h) | Waits for a quiet market (narrow bands), buys a 4h close above the upper band; exits below the middle band; ATR stop; 1% risk per trade. |
+| 3-Month Momentum | Holds BTC fully while its 90-day return is positive, else cash (4h candles). |
+| Weekly DCA (52 weeks) | Second benchmark: buys ₹5 lakh ÷ 52 every week, never sells. |
+
+The original 3 strategies' settings are the 1-hour versions that did least badly in the 180-day backtests (`results.md`). Honest note: **in those backtests none of them beat just holding BTC.** That is what this live paper run is for: see how they behave on prices nobody has seen yet.
+
+## V2: the regime test
+
+`research/v2_regimes.py` pulls BTC/USDT hourly candles from June 2020, and tests 8 strategies with an anchored walk-forward: each test year (2022, 2023, 2024, 2025, 2026 so far) uses settings tuned only on earlier years. Results are reported for the 2022 bear market, the 2023-24 bull market, the 2025 range and the last 6 months, against lump-sum HOLD and weekly DCA, with the same costs. A strategy PASSES only with at least 30 out-of-sample trades, better Sortino and Calmar than HOLD, and a profit.
+
+- Page: https://mtarvecha660-lgtm.github.io/btc-paper-live/v2.html
+- Full tables: `RESULTS_V2.md`
+- Re-run: `python research/v2_regimes.py` (downloads the history once into `data/`, which is not committed)
+
+Passed: the 100-day trend filter, the Bollinger squeeze (4h) and 3-month momentum, so they became live paper accounts. Failed: MACD + trend, volatility-targeted hold, and the original 3. These are backtests: a pass is a reason to paper-trade a strategy, not proof it will work.
 
 ## How it works
 
 1. Every ~15 min, GitHub Actions runs `live/tick.py` (`.github/workflows/paper-tick.yml`).
 2. It reads public BTC/USDT candles (Binance's public data mirror first; OKX, Bitstamp, Coinbase and Kraken are fallbacks). GitHub's servers are in the US, where Binance's main API is blocked, which is why the mirror goes first.
-3. On each **closed 1-hour candle**, each strategy decides BUY, SELL or WAIT. A buy or sell fills at the next candle's open with a **0.1% fee + 0.05% slippage**, using the same engine as the backtests (`btcpaper/engine.py`).
-4. Risk rules: 1% of the account risked per trade (the stop-loss sets the size), max 50% of the account in one trade, a stop on every trade, and trading pauses for the rest of the day (IST) after a 3% loss. No leverage, no shorting.
+3. On each **closed candle** (1 hour for the original 3, 4 hours for the V2 ones), each strategy decides BUY, SELL or WAIT. A buy or sell fills at the next candle's open with a **0.1% fee + 0.05% slippage**, using the same engine as the backtests (`btcpaper/engine.py`).
+4. Risk rules: 1% of the account risked per trade (the stop-loss sets the size), max 50% of the account in one trade, a stop on every trade, and trading pauses for the rest of the day (IST) after a 3% loss. No leverage, no shorting. The two "allocation" V2 accounts (trend filter, momentum) are the exception, set in `live/accounts.json` under `risk`: they hold a full position when in, keep a 30% crash stop, and have no daily pause, because that is the strategy that was tested.
 5. The bot commits the results back here (`live/`) and rebuilds the dashboard.
 
 If every price source fails, that run is logged as `skipped` in `live/ticks.csv`, the GitHub run turns **red** (so you notice), whatever did succeed is still committed, and the next run catches up on any candles it missed (up to 7 days). If the last good run is more than 45 minutes old, the dashboard shows a red "out of date" banner. GitHub may email you about red runs; one or two in a row is usually a price-source hiccup.

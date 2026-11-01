@@ -88,9 +88,18 @@ def account_dir(acc_id):
     return d
 
 
+def account_cfg(cfg, acc):
+    """Per-account overrides from accounts.json "risk" (e.g. a full-allocation trend account)."""
+    c = dict(cfg)
+    c.update(acc.get("risk") or {})
+    return c
+
+
 def run_strategy(acc, cfg, tf, start_usdt):
     """Runs the kit's own paper loop once (paper --once) for one account. Returns (ok, note)."""
     strat = load(acc["strategy"], acc.get("params") or {})
+    cfg = account_cfg(cfg, acc)
+    tf = acc.get("tf") or tf
     P.run_dir = lambda _name, _tf, _d=acc["id"]: account_dir(_d)   # one folder per account id
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
@@ -144,6 +153,60 @@ def run_hold(acc, cfg, start_usdt, price, src):
     return True, ""
 
 
+def run_dca(acc, cfg, start_usdt, price):
+    """Benchmark: spread the money evenly over `weeks` weekly buys (first buy at the start, then every
+    7 days), same fee + slippage. Never sells."""
+    d = account_dir(acc["id"])
+    sp = d / "state.json"
+    weeks = int((acc.get("params") or {}).get("weeks", 52))
+    st = read_json(sp)
+    now_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
+    if st is None:
+        eng = {"cash": float(start_usdt), "qty": 0.0, "start_balance": float(start_usdt), "entry_price": None,
+               "entry_ts": None, "stop": None, "pending": None, "halted_day": None, "last_ts": None,
+               "fees_paid": 0.0, "realized_pnl": 0.0, "last_close": price, "trade_id": 0,
+               "buys_done": 0, "next_buy_ts": now_ms, "per_buy": float(start_usdt) / weeks, "weeks": weeks}
+        st = {"strategy": "DCA", "tf": "1w", "params": {"weeks": weeks}, "mode": "PAPER", "started": now_iso(), "engine": eng}
+    eng = st["engine"]
+    fee, slip = cfg["fee_pct"] / 100, cfg["slippage_pct"] / 100
+    if price and eng["buys_done"] < eng["weeks"] and now_ms >= eng["next_buy_ts"]:
+        spend = min(eng["per_buy"], eng["cash"])
+        value = spend / (1 + fee)
+        fill = price * (1 + slip)
+        q = value / fill
+        eng["cash"] -= spend
+        eng["entry_price"] = ((eng["entry_price"] or 0) * eng["qty"] + fill * q) / (eng["qty"] + q)
+        eng["qty"] += q
+        eng["fees_paid"] += value * fee
+        eng["buys_done"] += 1
+        eng["trade_id"] += 1
+        eng["next_buy_ts"] += 7 * 86_400_000
+        eng["entry_ts"] = eng["entry_ts"] or now_ms
+        why = f"Weekly DCA buy {eng['buys_done']} of {eng['weeks']}: same amount every week, never sells"
+        P._log_trade(d, {"trade_id": eng["trade_id"], "ts": now_ms, "side": "BUY", "price": fill, "qty": q,
+                         "value": value, "fee": value * fee, "pnl": None, "stop": None, "reason": why})
+        append_csv(d / "decisions.csv", P.DEC_COLS, {"time": P._iso(now_ms), "action": "BUY", "price": fill,
+                   "equity": eng["cash"] + eng["qty"] * price, "ts": now_ms, "reason": why})
+    closes = {}
+    for other in sorted(STATE.iterdir()):
+        if other.name != acc["id"]:
+            for r in read_csv(other / "equity.csv"):
+                if r.get("ts"):
+                    closes[int(r["ts"])] = float(r["price"])
+    start_ts = eng.get("entry_ts") or now_ms
+    for ts in sorted(x for x in closes if x > (eng.get("last_ts") or 0) and x >= start_ts):
+        px = closes[ts]
+        P._append(d / "equity.csv", P.EQ_COLS, {"time": P._iso(ts), "equity": round(eng["cash"] + eng["qty"] * px, 4),
+                                                 "price": px, "position_btc": eng["qty"], "ts": ts})
+        eng["last_ts"], eng["last_close"] = ts, px
+    st["updated"] = now_iso()
+    write_json(sp, st)
+    return True, ""
+
+
+BENCHMARKS = {"HOLD", "DCA"}
+
+
 def main():
     acc_cfg = read_json(LIVE / "accounts.json")
     tf = acc_cfg.get("timeframe", "1h")
@@ -168,7 +231,7 @@ def main():
     status, notes = ("ok" if price else "skipped"), ([] if price else ["no price source answered"])
     if price:
         for acc in acc_cfg["accounts"]:
-            if acc["strategy"] == "HOLD":
+            if acc["strategy"] in BENCHMARKS:
                 continue
             try:
                 ok, note = run_strategy(acc, cfg, tf, meta["start_usdt"])
@@ -179,9 +242,12 @@ def main():
                 status = "error"
                 notes.append(f"{acc['id']}: {type(e).__name__}: {str(e)[:150]}")
         for acc in acc_cfg["accounts"]:
-            if acc["strategy"] == "HOLD":
+            if acc["strategy"] in BENCHMARKS:
                 try:
-                    ok, note = run_hold(acc, cfg, meta["start_usdt"], price, psrc)
+                    if acc["strategy"] == "HOLD":
+                        ok, note = run_hold(acc, cfg, meta["start_usdt"], price, psrc)
+                    else:
+                        ok, note = run_dca(acc, cfg, meta["start_usdt"], price)
                     if not ok:
                         notes.append(note)
                 except Exception as e:

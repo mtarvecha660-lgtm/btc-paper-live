@@ -43,3 +43,28 @@ def crossed_above(a, b):
 
 def crossed_below(a, b):
     return (a < b) & (_prev(a) >= _prev(b))
+
+
+# ---------- daily helpers for intraday candles (use COMPLETED days only) ----------
+def _days(df):
+    t = df["time"] if "time" in df else pd.to_datetime(df["ts"], unit="ms", utc=True)
+    return t.dt.floor("D")
+
+
+def daily_close_prev(df, sma_days):
+    """For each intraday row: (close of the PREVIOUS completed UTC day, its sma_days-day SMA of daily closes).
+    Today's unfinished day is never used, so values only change at 00:00 UTC."""
+    day = _days(df)
+    dclose = df["close"].groupby(day).last()          # today's value is partial, hence the shift below
+    dsma = dclose.rolling(sma_days, min_periods=sma_days).mean()
+    prev_close, prev_sma = dclose.shift(1), dsma.shift(1)
+    return (pd.Series(day.map(prev_close).values, index=df.index, dtype=float),
+            pd.Series(day.map(prev_sma).values, index=df.index, dtype=float))
+
+
+def daily_return_prev(df, lookback_days):
+    """Return over the last lookback_days COMPLETED days (yesterday's close vs the close lookback_days before)."""
+    day = _days(df)
+    dclose = df["close"].groupby(day).last()
+    ret = dclose.shift(1) / dclose.shift(1 + lookback_days) - 1
+    return pd.Series(day.map(ret).values, index=df.index, dtype=float)

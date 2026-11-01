@@ -41,6 +41,9 @@ def _f(x, d=None):
         return d
 
 
+_TFM = {"15m": 15, "30m": 30, "1h": 60, "4h": 240, "1d": 1440}
+
+
 def _close_time(dec, tfm):
     """decisions.csv stamps the candle's OPEN time; the decision is made when it closes."""
     try:
@@ -68,10 +71,22 @@ def _num(pat, s):
 def plain_reason(acc, dec, in_pos, params):
     """The decision in everyday words (the raw reason stays in decisions.csv)."""
     r, act = dec.get("reason", ""), dec.get("action", "")
-    if act not in ("WAIT", "HOLD"):
+    prefix = ""
+    if act == "BUY_NEXT_OPEN":
+        prefix, in_pos = "Buy signal. ", True
+    elif act == "SELL_NEXT_OPEN":
+        prefix, in_pos = "Sell signal. ", False
+    elif act not in ("WAIT", "HOLD"):
         return r
+    if prefix and acc.get("strategy") not in ("trend_sma200d", "tsmom"):
+        return r
+    out = _plain(acc, r, in_pos, params)
+    return (prefix + out.replace("Holding. ", "").replace("In cash. ", "")) if prefix else out
+
+
+def _plain(acc, r, in_pos, params):
     sid = acc.get("strategy")
-    money = lambda v: f"${v:,.0f}"
+    money = lambda v: f"${v:,.0f}"  # noqa: E731
     if sid == "ema_cross":
         import re
         m = re.search(r"ema(\d+)=([\d.]+) ema(\d+)=([\d.]+) trend=([\d.]+)", r)
@@ -90,6 +105,26 @@ def plain_reason(acc, dec, in_pos, params):
             if in_pos:
                 return f"Holding. RSI is {rsi:.0f}; sells when it gets back to {params.get('exit_rsi', 50)}, or at the stop."
             return f"Waiting for a dip. RSI is {rsi:.0f}; it buys when RSI falls below {params.get('low', 30)}."
+    if sid == "trend_sma200d":
+        dc, ds = _num(r"daily close ([\d.]+)", r), _num(r"SMA ([\d.]+)", r)
+        n = params.get("sma_days", 200)
+        if dc and ds:
+            if in_pos:
+                return f"Holding. Yesterday's close ({money(dc)}) is above the {n}-day average ({money(ds)}); sells if a daily close drops below it."
+            return f"In cash. Yesterday's close ({money(dc)}) is below the {n}-day average ({money(ds)}); buys when a daily close is back above."
+    if sid == "tsmom":
+        mom = _num(r"return (-?[\d.]+)%", r)
+        n = params.get("lookback_days", 90)
+        if mom is not None:
+            if in_pos:
+                return f"Holding. BTC is {mom:+.1f}% over the last {n} days; sells if that turns negative."
+            return f"In cash. BTC is {mom:+.1f}% over the last {n} days; buys when that turns positive."
+    if sid == "bb_squeeze":
+        up, mid = _num(r"upper ([\d.]+)", r), _num(r"mid ([\d.]+)", r)
+        if up and mid:
+            if in_pos:
+                return f"Holding. Sells on a 4h close below the middle band ({money(mid)}), or at the stop."
+            return f"Waiting for a quiet market, then a 4h close above the upper band ({money(up)})."
     if sid == "donchian_breakout":
         hi, lo = _num(r"hi\d+=([\d.]+)", r), _num(r"lo\d+=([\d.]+)", r)
         if hi and lo:
@@ -166,7 +201,7 @@ def build_latest(price=None):
             "halted": bool(e.get("halted_day")), "trades": len(tr),
             "last_trade": ({"time": last_trade["time"], "side": last_trade["side"],
                             "price": _f(last_trade["price"]), "reason": last_trade["reason"]} if last_trade else None),
-            "last_action": ({"time": _close_time(last_dec, 0 if a["strategy"] == "HOLD" else tfm), "action": last_dec["action"], "price": _f(last_dec["price"]),
+            "last_action": ({"time": _close_time(last_dec, 0 if a["strategy"] in ("HOLD", "DCA") else _TFM.get(a.get("tf") or acc_cfg.get("timeframe", "1h"), 60)), "action": last_dec["action"], "price": _f(last_dec["price"]),
                              "reason": last_dec["reason"],
                              "plain": plain_reason(a, last_dec, e["qty"] > 0, st.get("params", a.get("params", {})))}
                             if last_dec else None),
@@ -196,9 +231,22 @@ def build_latest(price=None):
                 [r["time"] for r in eq_rows] + [datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")],
                 liq + [eq], start),
         }
-    hold = next((x for x in accounts if x["strategy"] == "HOLD"), None)
+    for x, a in zip(accounts, acc_cfg.get("accounts", [])):
+        x["tf"] = a.get("tf") or acc_cfg.get("timeframe", "1h")
+        x["group"] = a.get("group", "v1")
+        x["badge"] = a.get("badge")
+    # vs HOLD over the SAME window: what buying BTC when this account started (and selling now, with the
+    # same fee + slippage) would have made. Accounts started at different times stay comparable.
+    rt = (1 - fee / 100) * (1 - slip / 100) / ((1 + fee / 100) * (1 + slip / 100))
+    priced = [t for t in ticks if t.get("btc_price")]
     for x in accounts:
-        x["excess_vs_hold_pct"] = (x["pnl_pct"] - hold["pnl_pct"]) if hold and x is not hold else None
+        p0 = None
+        if x.get("started") and priced:
+            s0 = str(x["started"]).replace("T", " ")[:19]
+            p0 = next((_f(t["btc_price"]) for t in priced if t["time_utc"] >= s0), None)
+        x["hold_same_window_pct"] = ((price / p0) * rt - 1) * 100 if (p0 and price) else None
+        x["excess_vs_hold_pct"] = (None if x["strategy"] == "HOLD" or x["hold_same_window_pct"] is None
+                                   else x["pnl_pct"] - x["hold_same_window_pct"])
     trades.sort(key=lambda t: t["time"], reverse=True)
     return {
         "mode": "PAPER TRADING - virtual money only",

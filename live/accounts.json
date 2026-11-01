@@ -1,5 +1,5 @@
 {
-  "_note": "The paper accounts the bot runs. PAPER ONLY: virtual money, public price data, no exchange keys. Change a strategy's params here (or add an account) and the next run picks it up. A brand-new id starts a fresh account; changing params of an existing id keeps its balance and history.",
+  "_note": "The paper accounts the bot runs. PAPER ONLY: virtual money, public price data, no exchange keys. Change a strategy's params here (or add an account) and the next run picks it up. A brand-new id starts a fresh account; changing params of an existing id keeps its balance and history. Optional per account: \"tf\" (candle size, default \"timeframe\"), \"risk\" (overrides of config.json risk rules, e.g. full allocation), \"group\"/\"badge\" (dashboard only).",
   "start_inr": 500000,
   "timeframe": "1h",
   "accounts": [
@@ -42,6 +42,69 @@
       "strategy": "HOLD",
       "params": {},
       "why": "Benchmark: buys BTC once with all its money at the start and never sells."
+    },
+    {
+      "id": "v2_trend_sma",
+      "label": "Trend Filter (100-day SMA)",
+      "strategy": "trend_sma200d",
+      "tf": "4h",
+      "params": {
+        "sma_days": 100,
+        "crash_stop_pct": 30
+      },
+      "risk": {
+        "risk_per_trade_pct": 100.0,
+        "max_position_pct": 100.0,
+        "daily_loss_limit_pct": 100.0,
+        "warmup_bars": 900
+      },
+      "group": "v2",
+      "badge": "V2 · passed",
+      "why": "Holds BTC (fully) only while the last daily close is above its 100-day average, else cash. Passed the 2022-26 out-of-sample test."
+    },
+    {
+      "id": "v2_bb_squeeze",
+      "label": "Bollinger Squeeze (4h)",
+      "strategy": "bb_squeeze",
+      "tf": "4h",
+      "params": {
+        "n": 20,
+        "squeeze_q": 0.25,
+        "atr_mult": 3.0
+      },
+      "group": "v2",
+      "badge": "V2 · passed",
+      "why": "Waits for a quiet market (narrow bands), buys the breakout above the upper band. 1% risk per trade. Passed the out-of-sample test."
+    },
+    {
+      "id": "v2_tsmom",
+      "label": "3-Month Momentum",
+      "strategy": "tsmom",
+      "tf": "4h",
+      "params": {
+        "lookback_days": 90,
+        "crash_stop_pct": 30
+      },
+      "risk": {
+        "risk_per_trade_pct": 100.0,
+        "max_position_pct": 100.0,
+        "daily_loss_limit_pct": 100.0,
+        "warmup_bars": 900
+      },
+      "group": "v2",
+      "badge": "V2 · passed",
+      "why": "Holds BTC (fully) while its last 3-month return is positive, else cash. Passed the out-of-sample test."
+    },
+    {
+      "id": "v2_dca_weekly",
+      "label": "Weekly DCA (52 weeks)",
+      "strategy": "DCA",
+      "params": {
+        "weeks": 52
+      },
+      "group": "v2",
+      "badge": "Benchmark",
+      "why": "Benchmark: buys the same amount (₹5 lakh ÷ 52) every week for a year, never sells."
     }
   ]
 }

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BTC strategies vs HOLD · V2 regime test</title>
+<meta property="og:title" content="BTC strategies vs HOLD: 2022 bear, 2023-24 bull, 2025 range">
+<meta property="og:description" content="Walk-forward, out-of-sample test of 8 strategies vs holding BTC and weekly DCA. Paper research, not advice.">
+<meta name="theme-color" content="#f6f5f1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>₿</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="banner" role="note"><strong>PAPER RESEARCH</strong> · backtests on past prices, no real money</div>
+<main>
+  <nav class="tabs-top"><a href="./">← Live accounts</a><span>V2 results</span></nav>
+  <header class="top">
+    <h1>Which strategy survives every market?</h1>
+    <p class="sub" id="sub">Out-of-sample test, 2022 to now</p>
+  </header>
+
+  <section class="panel">
+    <div class="panel-h"><h2>Ranking</h2><span class="hint">risk-adjusted, out-of-sample</span></div>
+    <div id="rank" class="rank-list"></div>
+    <p class="fine" id="passrule"></p>
+  </section>
+
+  <section class="panel">
+    <div class="panel-h"><h2>By market regime</h2></div>
+    <div class="seg" id="seg" role="tablist"></div>
+    <div id="regime" class="monthly"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-h"><h2>Growth of ₹100</h2><span class="hint">out-of-sample, log scale</span></div>
+    <div class="chartwrap"><canvas id="chart"></canvas></div>
+    <div id="legend" class="legend"></div>
+  </section>
+
+  <section class="panel about">
+    <h2>How this was tested</h2>
+    <ul id="how"></ul>
+    <h2 style="margin-top:12px">Weak spots</h2>
+    <ul>
+      <li>One coin, one exchange's prices, under 5 years out-of-sample. A few huge BTC moves drive every number.</li>
+      <li>These are famous ideas picked with hindsight (everyone knows trend filters worked on BTC). No test can remove that bias.</li>
+      <li>Trend and momentum trade rarely: they only just clear 30 trades (31 and 32), so treat their edge as thin evidence, not proof.</li>
+      <li>Real slippage in crashes can be worse than 0.05%. Indian tax (30% + 1% TDS) is not included.</li>
+      <li>BTC survived. The same rules on coins that died would look very different.</li>
+    </ul>
+    <p class="fine">Not financial advice. <a href="https://github.com/mtarvecha660-lgtm/btc-paper-live/blob/main/RESULTS_V2.md">Full tables (RESULTS_V2.md)</a></p>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="v2.js"></script>
+</body>
+</html>

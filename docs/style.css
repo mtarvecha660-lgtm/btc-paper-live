@@ -20,7 +20,7 @@ h2{font-size:16px;margin:0}
 .upd{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:13px;text-align:right}
 .dot{width:8px;height:8px;border-radius:50%;background:#9ca3af;flex:none}
 .dot.ok{background:var(--up)} .dot.stale{background:#d97706} .dot.bad{background:var(--down)}
-.cards{display:grid;grid-template-columns:1fr;gap:10px}
+.cards{display:grid;grid-template-columns:1fr;gap:12px}
 @media(min-width:640px){.cards{grid-template-columns:1fr 1fr}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;position:relative}
 .card.hold{background:#fafaf8}
@@ -70,3 +70,21 @@ a{color:var(--accent)}
 .monthly thead th{border-top:0;color:var(--muted);font-weight:600;font-size:12px}
 .up{color:var(--up)} .down{color:var(--down)}
 .metrics b.up{color:var(--up)} .metrics b.down{color:var(--down)}
+.tabs-top{display:flex;gap:12px;align-items:center;font-size:13.5px;margin:2px 0 6px}
+.tabs-top span{color:var(--muted)}
+.rank-list .rk{border-top:1px solid var(--line);padding:10px 0}
+.rank-list .rk:first-child{border-top:0}
+.rk .l1{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px}
+.kvs{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:12.5px;color:var(--muted);margin-top:4px}
+.kvs b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.kvs b.up{color:var(--up)} .kvs b.down{color:var(--down)}
+.pill.pass{color:var(--up);background:#e8f3ec} .pill.fail{color:#8a1c12;background:#fbeceb}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.seg button{font:inherit;font-size:12.5px;border:1px solid var(--line);background:#faf9f6;border-radius:999px;padding:5px 10px;color:var(--ink)}
+.seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.monthly tr.bench td{background:#faf9f6;font-weight:600}
+.v2link{display:block;margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-decoration:none;color:var(--ink)}
+.v2link b{color:var(--accent)}
+.card .badge{font-size:11px;font-weight:700;color:#7a5200;background:var(--warn-bg);border-radius:6px;padding:1px 6px;margin-left:6px}
+.group-h{font-size:13px;color:var(--muted);font-weight:650;margin:16px 2px 6px;letter-spacing:.02em;text-transform:uppercase}
+.monthly table.rt{font-size:12.5px} .monthly table.rt th,.monthly table.rt td{padding:6px 4px}

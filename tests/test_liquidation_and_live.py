@@ -132,7 +132,9 @@ class TickFailuresAreLoud(unittest.TestCase):
                 mock.patch.object(self.tick, "run_strategy", fake_run):
             rc = self.tick.main()
         self.assertNotEqual(rc, 0)
-        self.assertEqual(ran, ["ema_cross", "rsi_meanrev", "donchian_breakout"])
+        expected = [a["id"] for a in json.loads((self.tmp / "accounts.json").read_text())["accounts"]
+                    if a["strategy"] not in ("HOLD", "DCA")]
+        self.assertEqual(ran, expected)                    # every account after the broken one still ran
         self.assertTrue((self.tmp / "state" / "hold_btc" / "state.json").exists())   # benchmark still bought
         last = (self.tmp / "ticks.csv").read_text().strip().splitlines()[-1]
         self.assertIn(",error,", last)
