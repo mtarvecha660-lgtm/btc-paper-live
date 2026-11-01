@@ -1,14 +1,21 @@
 {
  "mode": "PAPER TRADING - virtual money only",
- "generated_utc": "2026-11-01 09:26:49",
+ "generated_utc": "2026-11-01 09:36:25",
  "last_tick": {
-  "time_utc": "2026-11-01 09:26:49",
+  "time_utc": "2026-11-01 09:36:25",
   "status": "ok",
-  "btc_price": "78064.46",
+  "btc_price": "77982.02",
   "source": "binance_vision",
   "note": ""
  },
  "recent_ticks": [
+  {
+   "time_utc": "2026-11-01 09:36:25",
+   "status": "ok",
+   "btc_price": "77982.02",
+   "source": "binance_vision",
+   "note": ""
+  },
   {
    "time_utc": "2026-11-01 09:26:49",
    "status": "ok",
@@ -24,9 +31,9 @@
    "note": ""
   }
  ],
- "ticks_ok_24h": 2,
- "ticks_24h": 2,
- "btc_price": 78064.46,
+ "ticks_ok_24h": 3,
+ "ticks_24h": 3,
+ "btc_price": 77982.02,
  "price_source": "binance_vision",
  "inr_per_usdt": 94.86,
  "meta": {
@@ -44,6 +51,15 @@
   "daily_loss_limit_pct": 3.0
  },
  "timeframe": "1h",
+ "health": {
+  "last_ok_tick_utc": "2026-11-01 09:36:25",
+  "consecutive_failures": 0,
+  "minutes_since_ok": 0.0,
+  "last_status": "ok",
+  "stale_after_minutes": 45,
+  "stale": false
+ },
+ "valuation": "liquidation: open BTC counted as sold now with fee + slippage, same for every account",
  "accounts": [
   {
    "id": "ema_cross",
@@ -76,7 +92,23 @@
     "reason": "ema20=77779.0 ema100=78529.0 trend=79430.0",
     "plain": "Waiting. The 20h average ($77,779) is below the 100h average ($78,529). Buys when it crosses above, if price is over the 200h trend ($79,430)."
    },
-   "decisions": 1
+   "decisions": 1,
+   "metrics": {
+    "profit_factor": 0.0,
+    "profit_factor_inf": false,
+    "closed_trades": 0,
+    "win_rate_pct": 0.0,
+    "expectancy_usdt": 0.0,
+    "avg_win_usdt": 0.0,
+    "avg_loss_usdt": 0.0,
+    "fees_pct_of_gross": null,
+    "fees_usdt": 0.0,
+    "sortino": null,
+    "monthly_returns_pct": {
+     "2026-11": 0.0
+    }
+   },
+   "excess_vs_hold_pct": 0.589958512730937
   },
   {
    "id": "rsi_meanrev",
@@ -110,7 +142,23 @@
     "reason": "exit condition true but nothing to sell | RSI above 50 (bounce done) | rsi=68.9 trend=79430.0",
     "plain": "Waiting for a dip. RSI is 69; it buys when RSI falls below 35."
    },
-   "decisions": 1
+   "decisions": 1,
+   "metrics": {
+    "profit_factor": 0.0,
+    "profit_factor_inf": false,
+    "closed_trades": 0,
+    "win_rate_pct": 0.0,
+    "expectancy_usdt": 0.0,
+    "avg_win_usdt": 0.0,
+    "avg_loss_usdt": 0.0,
+    "fees_pct_of_gross": null,
+    "fees_usdt": 0.0,
+    "sortino": null,
+    "monthly_returns_pct": {
+     "2026-11": 0.0
+    }
+   },
+   "excess_vs_hold_pct": 0.589958512730937
   },
   {
    "id": "donchian_breakout",
@@ -142,7 +190,23 @@
     "reason": "hi100=81971.0 lo10=77515.0",
     "plain": "Waiting for a breakout above the 100h high ($81,971)."
    },
-   "decisions": 1
+   "decisions": 1,
+   "metrics": {
+    "profit_factor": 0.0,
+    "profit_factor_inf": false,
+    "closed_trades": 0,
+    "win_rate_pct": 0.0,
+    "expectancy_usdt": 0.0,
+    "avg_win_usdt": 0.0,
+    "avg_loss_usdt": 0.0,
+    "fees_pct_of_gross": null,
+    "fees_usdt": 0.0,
+    "sortino": null,
+    "monthly_returns_pct": {
+     "2026-11": 0.0
+    }
+   },
+   "excess_vs_hold_pct": 0.589958512730937
   },
   {
    "id": "hold_btc",
@@ -151,9 +215,9 @@
    "strategy": "HOLD",
    "params": {},
    "started": "2026-11-01 09:08:51",
-   "equity_usdt": 5253.2459414423665,
-   "equity_inr": 498322.9100052229,
-   "pnl_pct": -0.33541848053467715,
+   "equity_usdt": 5239.829325723085,
+   "equity_inr": 497050.20983809186,
+   "pnl_pct": -0.589958512730937,
    "cash_usdt": 0.0,
    "fees_usdt": 5.2656599400599395,
    "realized_usdt": 0.0,
@@ -161,8 +225,8 @@
     "btc": 0.06729369474204223,
     "entry": 78248.93491499999,
     "stop": null,
-    "value_usdt": 5253.2459414423665,
-    "unrealized_pct": -0.23575389901521193
+    "value_usdt": 5247.698249247833,
+    "unrealized_pct": -0.341109965637143
    },
    "pending": null,
    "halted": false,
@@ -180,7 +244,23 @@
     "reason": "Benchmark: bought once with all the money; it only holds from here",
     "plain": "Benchmark: bought once with all the money; it only holds from here"
    },
-   "decisions": 1
+   "decisions": 1,
+   "metrics": {
+    "profit_factor": 0.0,
+    "profit_factor_inf": false,
+    "closed_trades": 0,
+    "win_rate_pct": 0.0,
+    "expectancy_usdt": 0.0,
+    "avg_win_usdt": 0.0,
+    "avg_loss_usdt": 0.0,
+    "fees_pct_of_gross": null,
+    "fees_usdt": 5.2656599400599395,
+    "sortino": null,
+    "monthly_returns_pct": {
+     "2026-11": -0.589958512730937
+    }
+   },
+   "excess_vs_hold_pct": null
   }
  ],
  "recent_trades": [
