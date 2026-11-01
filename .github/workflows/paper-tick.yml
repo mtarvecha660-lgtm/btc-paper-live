@@ -6,7 +6,9 @@ name: paper-tick
 
 on:
   schedule:
-    - cron: "*/15 * * * *"     # GitHub may start scheduled runs late; the bot catches up on missed candles
+    # every 15 min, off the busy :00 mark (GitHub drops or delays more runs at the top of the hour).
+    # GitHub may still start runs late; the bot catches up on any candles it missed.
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch: {}
 
 permissions:
