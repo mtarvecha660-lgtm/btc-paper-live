@@ -60,3 +60,13 @@ h2{font-size:16px;margin:0}
 .about li{margin:4px 0}
 .fine{color:var(--muted);font-size:12.5px;margin:8px 0 0}
 a{color:var(--accent)}
+.stale{background:#fdecea;color:#8a1c12;border-bottom:1px solid #f5c2bd;text-align:center;font-size:13px;padding:8px 12px;font-weight:600}
+.metrics{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--muted)}
+.metrics b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.monthly{overflow-x:auto}
+.monthly table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+.monthly th,.monthly td{padding:6px 6px;text-align:right;border-top:1px solid var(--line);white-space:nowrap}
+.monthly th:first-child,.monthly td:first-child{text-align:left}
+.monthly thead th{border-top:0;color:var(--muted);font-weight:600;font-size:12px}
+.up{color:var(--up)} .down{color:var(--down)}
+.metrics b.up{color:var(--up)} .metrics b.down{color:var(--down)}

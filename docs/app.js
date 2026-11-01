@@ -25,9 +25,48 @@
   function renderClock() {
     if (!data) return;
     const t = data.last_tick || {};
-    const m = (Date.now() - utc(data.generated_utc).getTime()) / 60000;
+    const h = data.health || {};
+    const lastOk = h.last_ok_tick_utc ? utc(h.last_ok_tick_utc) : null;
+    const okMin = lastOk ? (Date.now() - lastOk.getTime()) / 60000 : Infinity;
+    const limit = h.stale_after_minutes || 45;
     $("updated").textContent = "Updated " + ago(data.generated_utc);
-    $("dot").className = "dot " + (t.status && t.status !== "ok" ? "bad" : m > 45 ? "stale" : "ok");
+    $("dot").className = "dot " + (okMin > limit || (t.status && t.status !== "ok") ? "bad" : "ok");
+    const s = $("stale");
+    if (okMin > limit) {
+      s.hidden = false;
+      s.textContent = (lastOk ? `The bot's last good run was ${ago(h.last_ok_tick_utc)}` : "The bot hasn't had a good run yet") +
+        (h.consecutive_failures ? ` (${h.consecutive_failures} failed in a row)` : "") + ". Numbers below may be out of date.";
+    } else s.hidden = true;
+  }
+
+  function metricsRow(a) {
+    const m = a.metrics || {}, rate = data.inr_per_usdt;
+    const money = (v) => (v > 0 ? "+" : v < 0 ? "−" : "") + inr(Math.abs(v) * rate);
+    const parts = [];
+    if (a.excess_vs_hold_pct != null) parts.push(`vs Hold <b class="${cls(a.excess_vs_hold_pct)}">${pct(a.excess_vs_hold_pct)}</b>`);
+    if (a.strategy !== "HOLD") {
+      if (m.closed_trades) {
+        parts.push(`Profit factor <b>${m.profit_factor_inf ? "∞" : m.profit_factor.toFixed(2)}</b>`);
+        parts.push(`Expectancy <b>${money(m.expectancy_usdt)}</b>/trade`);
+        parts.push(`Avg win / loss <b>${money(m.avg_win_usdt)}</b> / <b>${money(m.avg_loss_usdt)}</b>`);
+        if (m.fees_pct_of_gross != null) parts.push(`Fees <b>${m.fees_pct_of_gross.toFixed(0)}%</b> of gross`);
+      } else parts.push(`No closed trades yet`);
+    }
+    if (m.sortino != null) parts.push(`Sortino <b>${m.sortino.toFixed(2)}</b>`);
+    return parts.length ? `<div class="metrics">${parts.map((p) => `<span>${p}</span>`).join("")}</div>` : "";
+  }
+
+  function renderMonthly() {
+    const months = new Set();
+    data.accounts.forEach((a) => Object.keys((a.metrics || {}).monthly_returns_pct || {}).forEach((k) => months.add(k)));
+    const ms = [...months].sort().reverse();
+    if (!ms.length) { $("monthly").innerHTML = `<div class="empty">No data yet.</div>`; return; }
+    const label = (k) => new Date(k + "-01T00:00:00Z").toLocaleString("en-IN", { month: "short", year: "numeric", timeZone: "UTC" });
+    const short = { ema_cross: "EMA", rsi_meanrev: "RSI", donchian_breakout: "Donchian", hold_btc: "Hold" };
+    $("monthly").innerHTML = `<table><thead><tr><th>Month</th>${data.accounts.map((a) => `<th>${esc(short[a.id] || a.label)}</th>`).join("")}</tr></thead>
+      <tbody>${ms.map((k) => `<tr><td>${label(k)}</td>${data.accounts.map((a) => {
+        const v = ((a.metrics || {}).monthly_returns_pct || {})[k];
+        return v == null ? "<td>–</td>" : `<td class="${cls(v)}">${pct(v)}</td>`; }).join("")}</tr>`).join("")}</tbody></table>`;
   }
 
   function render() {
@@ -58,6 +97,7 @@
           <dt>Trades</dt><dd>${a.trades}${lt ? ` · last ${esc(lt.side)} ${ist(lt.time)}` : ""}</dd>
         </dl>
         ${la ? `<div class="reason">${esc(la.plain || la.reason)}</div>` : ""}
+        ${metricsRow(a)}
       </article>`;
     }).join("");
 
@@ -99,6 +139,8 @@
       if (chart) { chart.data.datasets = sets; chart.update(); }
       else chart = new Chart($("chart"), { type: "line", data: { datasets: sets }, options: opts });
     }
+
+    renderMonthly();
 
     // trades
     $("tradecount").textContent = data.trade_count ? data.trade_count + " total" : "";

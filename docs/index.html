@@ -13,6 +13,7 @@
 </head>
 <body>
 <div class="banner" role="note"><strong>PAPER TRADING</strong> · virtual money only, no real money is used</div>
+<div id="stale" class="stale" role="alert" hidden></div>
 <main>
   <header class="top">
     <div>
@@ -38,6 +39,11 @@
   </section>
 
   <section class="panel">
+    <div class="panel-h"><h2>Monthly returns</h2><span class="hint">vs Just Hold BTC</span></div>
+    <div id="monthly" class="monthly"></div>
+  </section>
+
+  <section class="panel">
     <div class="panel-h"><h2>Recent trades</h2><span class="hint" id="tradecount"></span></div>
     <div id="trades" class="trades"></div>
   </section>
@@ -54,6 +60,8 @@
       <li>Strategies decide on each closed <b>1-hour</b> candle and “fill” at the next candle’s open, paying a 0.1% fee + 0.05% slippage, like a real exchange.</li>
       <li>Risk rules: 1% of the account risked per trade, max 50% in one trade, a stop-loss on every trade, trading pauses for the day after a 3% loss. No leverage, no shorting.</li>
       <li>“Just Hold BTC” buys once at the start and never sells. A strategy is only worth anything if it beats that over weeks.</li>
+      <li>Every value counts an open position as if it were sold right now (fee + slippage), the same rule for the strategies and for Just Hold BTC, so the race is fair.</li>
+      <li><b>Profit factor</b> = money won ÷ money lost on closed trades (above 1 is good). <b>Expectancy</b> = average result per closed trade. <b>Fees % of gross</b> = how much of the before-fee profit or loss went to fees. <b>Sortino</b> = return per unit of downside swings (higher is better).</li>
       <li id="ratenote"></li>
     </ul>
     <p class="fine">Past or paper results don’t predict real results. Not financial advice. <a id="repolink" href="https://github.com/mtarvecha660-lgtm/btc-paper-live">Code & raw data on GitHub</a></p>

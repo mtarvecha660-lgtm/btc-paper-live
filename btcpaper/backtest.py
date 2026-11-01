@@ -33,7 +33,8 @@ def run_range(strategy, sig, cfg, start_i, end_i, tf, collect=False):
         if collect and dec["action"] != "WAIT":
             decisions.append(dec)
     m = summarize(equity, trades, tf, cfg["starting_balance_usdt"], list(C[start_i:end_i]),
-                  cfg["fee_pct"], cfg["slippage_pct"], in_mkt)
+                  cfg["fee_pct"], cfg["slippage_pct"], in_mkt,
+                  end_cash=eng.s["cash"], end_qty=eng.s["qty"], times=list(TS[start_i:end_i]))
     m["open_position"] = eng.in_position()
     return m, trades, equity, decisions
 
@@ -128,12 +129,33 @@ def _save(result, trades, equity, decisions, dfw):
         print(f"[chart] skipped: {e}")
 
 
+def _pf(v):
+    return "inf" if v == float("inf") else f"{v:.2f}"
+
+
 def fmt_row(r, seg):
     m = r[seg]
+    fg = m.get("fees_pct_of_gross")
     return (f"| {r['strategy']} | {r['tf']} | {seg} | {m['return_pct']:+.1f}% | {m['hold_return_pct']:+.1f}% | "
-            f"{m['max_dd_pct']:.1f}% | {m['win_rate_pct']:.0f}% | {m['trades']} | {m['sharpe']:.2f} | "
-            f"{m['exposure_pct']:.0f}% | {m['fees_paid']:.0f} |")
+            f"{m.get('excess_vs_hold_pct', m['return_pct'] - m['hold_return_pct']):+.1f}% | "
+            f"{m['max_dd_pct']:.1f}% | {m['win_rate_pct']:.0f}% | {m['trades']} | {_pf(m['profit_factor'])} | "
+            f"{m.get('expectancy_usdt', 0):+.1f} | {m.get('avg_win_usdt', 0):+.1f} / {m.get('avg_loss_usdt', 0):+.1f} | "
+            f"{m['sharpe']:.2f} | {m.get('sortino', 0):.2f} | {m['exposure_pct']:.0f}% | {m['fees_paid']:.0f} | "
+            f"{'n/a' if fg is None else f'{fg:.0f}%'} |")
 
 
-TABLE_HEAD = ("| strategy | tf | period | return | hold BTC | max DD | win rate | trades | Sharpe | time in market | fees (USDT) |\n"
-              "|---|---|---|---|---|---|---|---|---|---|---|")
+TABLE_HEAD = ("| strategy | tf | period | return | hold BTC | vs hold | max DD | win rate | trades | profit factor | "
+              "expectancy/trade (USDT) | avg win / avg loss (USDT) | Sharpe | Sortino | time in market | fees (USDT) | "
+              "fees % of gross P&L |\n"
+              "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+
+
+def fmt_monthly(r, seg="test"):
+    """Monthly returns table (strategy vs hold) for one result segment."""
+    m = r[seg]
+    mr, hr = m.get("monthly_returns_pct") or {}, m.get("hold_monthly_returns_pct") or {}
+    if not mr:
+        return []
+    lines = [f"Monthly returns, {r['strategy']} {r['tf']} ({seg}): " +
+             ", ".join(f"{k} {v:+.1f}% (hold {hr.get(k, 0):+.1f}%)" for k, v in mr.items())]
+    return lines

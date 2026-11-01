@@ -23,7 +23,11 @@ The strategy settings are the 1-hour versions that did least badly in the 180-da
 4. Risk rules: 1% of the account risked per trade (the stop-loss sets the size), max 50% of the account in one trade, a stop on every trade, and trading pauses for the rest of the day (IST) after a 3% loss. No leverage, no shorting.
 5. The bot commits the results back here (`live/`) and rebuilds the dashboard.
 
-If every price source fails, that run is logged as `skipped` in `live/ticks.csv` and the next run catches up on any candles it missed (up to 7 days).
+If every price source fails, that run is logged as `skipped` in `live/ticks.csv`, the GitHub run turns **red** (so you notice), whatever did succeed is still committed, and the next run catches up on any candles it missed (up to 7 days). If the last good run is more than 45 minutes old, the dashboard shows a red "out of date" banner. GitHub may email you about red runs; one or two in a row is usually a price-source hiccup.
+
+**Fair comparison:** every value on the dashboard and in the backtests counts an open position as if it were sold right now, with the fee and slippage. That's the same rule as "Just Hold BTC", which pays to buy and would pay to sell. So Hold starts slightly below ₹5,00,000 (the round-trip cost), and a strategy holding BTC is never flattered by a sale it hasn't paid for.
+
+**Metrics** (dashboard cards and `python -m btcpaper backtest`): return vs Hold, profit factor (money won ÷ money lost on closed trades), expectancy per trade, average win and average loss, fees as a % of the before-fee P&L, Sortino, and monthly returns.
 
 ₹ values use the USDT→INR rate from when the bot started (in `live/meta.json`), so ₹ and % always tell the same story.
 

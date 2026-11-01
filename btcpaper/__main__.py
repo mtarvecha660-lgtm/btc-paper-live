@@ -94,7 +94,7 @@ def main(argv=None):
 
     if a.cmd == "backtest":
         from . import data as D
-        from .backtest import backtest, fmt_row, TABLE_HEAD
+        from .backtest import backtest, fmt_row, fmt_monthly, TABLE_HEAD
         from .check import check
         from .strategies import load, load_all, parse_params
         cfg = _cfg(a)
@@ -143,6 +143,10 @@ def main(argv=None):
                 wf = res["walk_forward"]
                 lines.append(f"  walk-forward ({len(wf['folds'])} folds, test windows only): "
                              f"{wf['compounded_return_pct']:+.1f}% vs hold {wf['compounded_hold_pct']:+.1f}%")
+        lines.append("")
+        lines.append("All returns count any position still open at the end as sold (fee + slippage), same as hold BTC.")
+        for res in results:
+            lines += fmt_monthly(res, "test")
         text = "\n".join(lines)
         print("\n" + text)
         RESULTS_DIR.mkdir(exist_ok=True)

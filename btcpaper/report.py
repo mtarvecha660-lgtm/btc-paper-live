@@ -48,7 +48,10 @@ def report(cfg, run_name=None, date=None, inr=False, live_price=True):
         if live_price:
             price, _ = D.last_price(cfg["symbol"], [meta.get("source")] + cfg["sources"] if meta.get("source") else cfg["sources"])
         price = price or s.get("last_close") or 0
-        equity = s["cash"] + s["qty"] * price
+        # liquidation value: an open position counts as sold now (fee + slippage), same rule as hold BTC
+        from .metrics import liquidation_value
+        equity = liquidation_value(s["cash"], s["qty"], price, meta.get("fee_pct", cfg["fee_pct"]),
+                                   meta.get("slippage_pct", cfg["slippage_pct"]))
         start = s["start_balance"]
         eq_day = eq[eq["day"] == day] if len(eq) else eq
         prev = eq[eq["day"] < day] if len(eq) else eq

@@ -45,6 +45,7 @@ jobs:
         run: python live/tick.py
 
       - name: Commit paper state
+        if: always()      # commit what succeeded even when the tick reported a failure
         run: |
           git config user.name  "paper-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

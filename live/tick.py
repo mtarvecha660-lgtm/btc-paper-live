@@ -199,7 +199,9 @@ def main():
     write_json(LIVE / "latest.json", {k: v for k, v in latest.items() if k != "equity_series"})
     print(f"[tick] {status} | BTC {price} ({psrc}) | " + " | ".join(
         f"{a['id']} {a['pnl_pct']:+.2f}%" for a in latest["accounts"]) + (f" | notes: {notes}" if notes else ""))
-    return 0      # a skipped/error tick is logged, not a failed workflow (the next tick retries)
+    # A skipped or errored tick exits non-zero so the GitHub run shows red. The workflow still commits
+    # whatever succeeded and rebuilds the dashboard (those steps run `if: always()`).
+    return 0 if status == "ok" else 1
 
 
 if __name__ == "__main__":

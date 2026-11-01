@@ -12,7 +12,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from btcpaper.metrics import liquidation_value, monthly_returns, sortino, trade_stats  # noqa: E402
+
 LIVE = ROOT / "live"
+STALE_MINUTES = 45      # the dashboard turns red when the last good tick is older than this
 STATE = LIVE / "state"
 
 
@@ -95,6 +99,27 @@ def plain_reason(acc, dec, in_pos, params):
     return r
 
 
+def health(ticks, now=None):
+    """Bot health from live/ticks.csv: last good tick, how many ticks in a row failed, minutes since good."""
+    now = now or datetime.now(timezone.utc)
+    last_ok = next((t for t in reversed(ticks) if t.get("status") == "ok"), None)
+    fails = 0
+    for t in reversed(ticks):
+        if t.get("status") == "ok":
+            break
+        fails += 1
+    mins = None
+    if last_ok:
+        lt = datetime.strptime(last_ok["time_utc"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        mins = round((now - lt).total_seconds() / 60, 1)
+    return {"last_ok_tick_utc": last_ok["time_utc"] if last_ok else None,
+            "consecutive_failures": fails,
+            "minutes_since_ok": mins,
+            "last_status": ticks[-1]["status"] if ticks else None,
+            "stale_after_minutes": STALE_MINUTES,
+            "stale": (mins is None) or mins > STALE_MINUTES}
+
+
 def build_latest(price=None):
     acc_cfg = _j(LIVE / "accounts.json", {})
     meta = _j(LIVE / "meta.json", {})
@@ -104,6 +129,8 @@ def build_latest(price=None):
     if price is None:
         price = _f(last_ok.get("btc_price"))
     rate = meta.get("inr_per_usdt_at_start") or 88.0
+    fee, slip = meta.get("fee_pct", 0.1), meta.get("slippage_pct", 0.05)
+    haircut = 1 - (1 - slip / 100) * (1 - fee / 100)      # cost of selling an open position right now
     start_usdt = meta.get("start_usdt") or 0
     accounts, trades, series = [], [], {}
     tfm = {"15m": 15, "30m": 30, "1h": 60, "4h": 240, "1d": 1440}.get(acc_cfg.get("timeframe", "1h"), 60)
@@ -114,11 +141,12 @@ def build_latest(price=None):
             accounts.append({"id": a["id"], "label": a["label"], "why": a.get("why", ""), "strategy": a["strategy"],
                              "params": a.get("params", {}), "started": None, "equity_usdt": start_usdt,
                              "equity_inr": start_usdt * rate, "pnl_pct": 0.0, "position": None,
-                             "last_action": None, "trades": 0, "halted": False, "pending": None})
+                             "last_action": None, "trades": 0, "halted": False, "pending": None, "metrics": {}})
             continue
         e = st["engine"]
         px = price or e.get("last_close") or 0
-        eq = e["cash"] + e["qty"] * px
+        # liquidation value: any open BTC counts as sold now with fee + slippage (same rule for HOLD)
+        eq = liquidation_value(e["cash"], e["qty"], px, fee, slip)
         start = e.get("start_balance") or start_usdt
         decs = _csv(d / "decisions.csv")
         tr = _csv(d / "trades.csv")
@@ -149,8 +177,28 @@ def build_latest(price=None):
                            "price": _f(t["price"]), "qty": _f(t["qty"]), "value": _f(t["value"]),
                            "fee": _f(t["fee"]), "pnl": _f(t.get("pnl")), "return_pct": _f(t.get("return_pct")),
                            "reason": t["reason"]})
-        pts = [[r["time"], round(_f(r["equity"], 0), 2)] for r in _csv(d / "equity.csv")]
+        eq_rows = _csv(d / "equity.csv")
+        liq = [_f(r["equity"], 0) - _f(r.get("position_btc"), 0) * _f(r.get("price"), 0) * haircut for r in eq_rows]
+        pts = [[r["time"], round(v, 2)] for r, v in zip(eq_rows, liq)]
         series[a["id"]] = _thin(pts)
+        tstats = trade_stats([{"side": t["side"], "pnl": _f(t.get("pnl")), "fee": _f(t.get("fee"), 0),
+                               "trade_id": t.get("trade_id")} for t in tr])
+        curve = [start] + liq + [eq]
+        accounts[-1]["metrics"] = {
+            "profit_factor": None if tstats["profit_factor"] == float("inf") else tstats["profit_factor"],
+            "profit_factor_inf": tstats["profit_factor"] == float("inf"),
+            "closed_trades": tstats["trades"], "win_rate_pct": tstats["win_rate_pct"],
+            "expectancy_usdt": tstats["expectancy_usdt"], "avg_win_usdt": tstats["avg_win_usdt"],
+            "avg_loss_usdt": tstats["avg_loss_usdt"], "fees_pct_of_gross": tstats["fees_pct_of_gross"],
+            "fees_usdt": e.get("fees_paid", 0),
+            "sortino": sortino(curve, acc_cfg.get("timeframe", "1h")) if len(curve) > 3 else None,
+            "monthly_returns_pct": monthly_returns(
+                [r["time"] for r in eq_rows] + [datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")],
+                liq + [eq], start),
+        }
+    hold = next((x for x in accounts if x["strategy"] == "HOLD"), None)
+    for x in accounts:
+        x["excess_vs_hold_pct"] = (x["pnl_pct"] - hold["pnl_pct"]) if hold and x is not hold else None
     trades.sort(key=lambda t: t["time"], reverse=True)
     return {
         "mode": "PAPER TRADING - virtual money only",
@@ -160,6 +208,8 @@ def build_latest(price=None):
         "ticks_24h": len(ticks[-96:]),
         "btc_price": price, "price_source": last_ok.get("source"),
         "inr_per_usdt": rate, "meta": meta, "timeframe": acc_cfg.get("timeframe"),
+        "health": health(ticks),
+        "valuation": "liquidation: open BTC counted as sold now with fee + slippage, same for every account",
         "accounts": accounts, "recent_trades": trades[:40], "trade_count": len(trades),
         "equity_series": series,
     }
