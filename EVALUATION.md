@@ -40,3 +40,16 @@ An account is marked **FAILED early** if:
 - **PASS:** keep paper-trading for another 12 months with the same rules. Still no real money.
 - **NOT ENOUGH EVIDENCE:** extend the test. Do not change the strategy.
 - **FAIL:** stop tracking it as a candidate, and record why.
+
+## Clarification — 2026-11-01 17:15 IST (still before any forward results; thresholds unchanged)
+Raised in review: test #5 needed an exact calculation. This defines it and changes no threshold.
+
+**Test #5 (consistency), exact method**
+- Split the forward window into consecutive 2-month blocks starting at the account's start date. A block shorter than 30 days at the end is dropped.
+- In each block, compute the **Sortino ratio of daily returns** for the candidate and for HOLD, using the same valuation and the same days. Sortino only, not Calmar: Calmar over 2 months is too noisy to be meaningful.
+- If a Sortino is undefined in a block (no down days, e.g. sitting in cash), compare **net return** in that block instead.
+- The block is **"worse"** if the candidate's value is strictly lower than HOLD's.
+- Test #5 passes if worse blocks are **no more than half** of all blocks (for example, 3 of 6 is OK and 4 of 6 fails).
+
+**Note on test #4 (trade count)**
+The trade minimum only stops a premature pass. It is not proof. A PASS on 6–12 trades is a weak pass, and the verdict must say so with the actual trade count next to it.
