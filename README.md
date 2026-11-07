@@ -2,7 +2,7 @@
 
 # BTC Paper Bot
 
-**A 24/7 Bitcoin paper-trading lab: four strategies race against simply holding BTC, with virtual money only.**
+**A 24/7 Bitcoin paper-trading lab: a set of trading strategies races against simply holding BTC, with virtual money only.**
 
 ![Python](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/runs%20on-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
