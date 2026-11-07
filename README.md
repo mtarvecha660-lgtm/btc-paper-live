@@ -1,8 +1,19 @@
-# BTC Paper Bot · live
+<div align="center">
 
-**PAPER TRADING. Virtual money only.** No exchange account, no API keys, no real orders. Nothing in this repo can touch real money.
+# BTC Paper Bot
 
-**Dashboard (open on your phone): https://mtarvecha660-lgtm.github.io/btc-paper-live/**
+**A 24/7 Bitcoin paper-trading lab: four strategies race against simply holding BTC, with virtual money only.**
+
+![Python](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/runs%20on-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
+![Mode](https://img.shields.io/badge/mode-PAPER%20ONLY-critical)
+![Money](https://img.shields.io/badge/money-virtual%20%E2%82%B95%2C00%2C000-lightgrey)
+
+[Live dashboard](https://mtarvecha660-lgtm.github.io/btc-paper-live/) · [V2 regime test](https://mtarvecha660-lgtm.github.io/btc-paper-live/v2.html) · [Not financial advice](#safety)
+
+</div>
+
+> **PAPER ONLY.** Virtual money, no exchange account, no API keys, no real orders. Most retail trading strategies lose money, and this is not financial advice.
 
 Three trading strategies race against simply holding Bitcoin. Each account starts with a virtual **₹5,00,000**. The bot runs on GitHub's servers every ~15 minutes, for free, whether your laptop is on or off.
 
