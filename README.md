@@ -9,6 +9,10 @@
 ![Mode](https://img.shields.io/badge/mode-PAPER%20ONLY-critical)
 ![Money](https://img.shields.io/badge/money-virtual%20%E2%82%B95%2C00%2C000-lightgrey)
 
+<p align="center">
+  <img src="docs/screenshot.png" alt="BTC Paper Bot live dashboard: paper strategies against buy-and-hold BTC, virtual money" width="720">
+</p>
+
 [Live dashboard](https://mtarvecha660-lgtm.github.io/btc-paper-live/) · [V2 regime test](https://mtarvecha660-lgtm.github.io/btc-paper-live/v2.html) · [Not financial advice](#safety)
 
 </div>
