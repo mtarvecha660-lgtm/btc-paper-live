@@ -1,14 +1,21 @@
 {
  "mode": "PAPER TRADING - virtual money only",
- "generated_utc": "2026-11-12 18:08:47",
+ "generated_utc": "2026-11-12 18:23:00",
  "last_tick": {
-  "time_utc": "2026-11-12 18:08:47",
+  "time_utc": "2026-11-12 18:23:00",
   "status": "ok",
-  "btc_price": "71907.35",
+  "btc_price": "71848.0",
   "source": "binance_vision",
   "note": ""
  },
  "recent_ticks": [
+  {
+   "time_utc": "2026-11-12 18:23:00",
+   "status": "ok",
+   "btc_price": "71848.0",
+   "source": "binance_vision",
+   "note": ""
+  },
   {
    "time_utc": "2026-11-12 18:08:47",
    "status": "ok",
@@ -85,18 +92,11 @@
    "btc_price": "71375.91",
    "source": "binance_vision",
    "note": ""
-  },
-  {
-   "time_utc": "2026-11-12 15:32:22",
-   "status": "ok",
-   "btc_price": "71447.0",
-   "source": "binance_vision",
-   "note": ""
   }
  ],
  "ticks_ok_24h": 96,
  "ticks_24h": 96,
- "btc_price": 71907.35,
+ "btc_price": 71848.0,
  "price_source": "binance_vision",
  "inr_per_usdt": 94.86,
  "meta": {
@@ -115,7 +115,7 @@
  },
  "timeframe": "1h",
  "health": {
-  "last_ok_tick_utc": "2026-11-12 18:08:47",
+  "last_ok_tick_utc": "2026-11-12 18:23:00",
   "consecutive_failures": 0,
   "minutes_since_ok": 0.0,
   "last_status": "ok",
@@ -174,8 +174,8 @@
    "tf": "1h",
    "group": "v1",
    "badge": null,
-   "hold_same_window_pct": -5.809943913226268,
-   "excess_vs_hold_pct": 5.809943913226268
+   "hold_same_window_pct": -5.934474551946456,
+   "excess_vs_hold_pct": 5.934474551946456
   },
   {
    "id": "rsi_meanrev",
@@ -228,8 +228,8 @@
    "tf": "1h",
    "group": "v1",
    "badge": null,
-   "hold_same_window_pct": -5.809943913226268,
-   "excess_vs_hold_pct": 5.809943913226268
+   "hold_same_window_pct": -5.934474551946456,
+   "excess_vs_hold_pct": 5.934474551946456
   },
   {
    "id": "donchian_breakout",
@@ -285,8 +285,8 @@
    "tf": "1h",
    "group": "v1",
    "badge": null,
-   "hold_same_window_pct": -5.809943913226268,
-   "excess_vs_hold_pct": 5.889905959858321
+   "hold_same_window_pct": -5.934474551946456,
+   "excess_vs_hold_pct": 6.01443659857851
   },
   {
    "id": "hold_btc",
@@ -295,9 +295,9 @@
    "strategy": "HOLD",
    "params": {},
    "started": "2026-11-01 09:08:51",
-   "equity_usdt": 4831.655313173907,
-   "equity_inr": 458330.82300767687,
-   "pnl_pct": -8.333835841395532,
+   "equity_usdt": 4827.667421215201,
+   "equity_inr": 457952.53157647396,
+   "pnl_pct": -8.409494127270523,
    "cash_usdt": 0.0,
    "fees_usdt": 5.2656599400599395,
    "realized_usdt": 0.0,
@@ -305,8 +305,8 @@
     "btc": 0.06729369474204223,
     "entry": 78248.93491499999,
     "stop": null,
-    "value_usdt": 4838.911260609191,
-    "unrealized_pct": -8.104372183325825
+    "value_usdt": 4834.91737982625,
+    "unrealized_pct": -8.180219861079486
    },
    "pending": null,
    "halted": false,
@@ -335,15 +335,15 @@
     "avg_loss_usdt": 0.0,
     "fees_pct_of_gross": null,
     "fees_usdt": 5.2656599400599395,
-    "sortino": -8.435023483214966,
+    "sortino": -8.516440129125964,
     "monthly_returns_pct": {
-     "2026-11": -8.333835841395532
+     "2026-11": -8.409494127270523
     }
    },
    "tf": "1h",
    "group": "v1",
    "badge": null,
-   "hold_same_window_pct": -5.809943913226268,
+   "hold_same_window_pct": -5.934474551946456,
    "excess_vs_hold_pct": null
   },
   {
@@ -398,8 +398,8 @@
    "tf": "4h",
    "group": "v2",
    "badge": "V2 · passed",
-   "hold_same_window_pct": -5.809943913226268,
-   "excess_vs_hold_pct": 2.853245522175185
+   "hold_same_window_pct": -5.934474551946456,
+   "excess_vs_hold_pct": 2.977776160895374
   },
   {
    "id": "v2_bb_squeeze",
@@ -458,8 +458,8 @@
    "tf": "4h",
    "group": "v2",
    "badge": "V2 · passed",
-   "hold_same_window_pct": -5.809943913226268,
-   "excess_vs_hold_pct": 5.198012432888099
+   "hold_same_window_pct": -5.934474551946456,
+   "excess_vs_hold_pct": 5.322543071608289
   },
   {
    "id": "v2_tsmom",
@@ -471,9 +471,9 @@
     "crash_stop_pct": 30
    },
    "started": "2026-11-01T09:51:46+00:00",
-   "equity_usdt": 4845.194753335605,
-   "equity_inr": 459615.1743014155,
-   "pnl_pct": -8.076965583888995,
+   "equity_usdt": 4841.195686361081,
+   "equity_inr": 459235.82280821213,
+   "pnl_pct": -8.152835882163057,
    "cash_usdt": 0.0,
    "fees_usdt": 5.2656599400599395,
    "realized_usdt": 0.0,
@@ -481,8 +481,8 @@
     "btc": 0.0674822675797476,
     "entry": 78030.27563999999,
     "stop": 54593.89599999999,
-    "value_usdt": 4852.471033650564,
-    "unrealized_pct": -7.846858914415067
+    "value_usdt": 4848.465961069705,
+    "unrealized_pct": -7.9229191352885975
    },
    "pending": null,
    "halted": false,
@@ -511,16 +511,16 @@
     "avg_loss_usdt": 0.0,
     "fees_pct_of_gross": null,
     "fees_usdt": 5.2656599400599395,
-    "sortino": -13.362297626392987,
+    "sortino": -13.498811857436548,
     "monthly_returns_pct": {
-     "2026-11": -8.076965583888995
+     "2026-11": -8.152835882163057
     }
    },
    "tf": "4h",
    "group": "v2",
    "badge": "V2 · passed",
-   "hold_same_window_pct": -5.809943913226268,
-   "excess_vs_hold_pct": -2.2670216706627278
+   "hold_same_window_pct": -5.934474551946456,
+   "excess_vs_hold_pct": -2.2183613302166005
   },
   {
    "id": "v2_dca_weekly",
@@ -531,9 +531,9 @@
     "weeks": 52
    },
    "started": "2026-11-01 09:51:48",
-   "equity_usdt": 5256.95231859551,
-   "equity_inr": 498674.49694197014,
-   "pnl_pct": -0.2651010935249998,
+   "equity_usdt": 5256.796526634464,
+   "equity_inr": 498659.7185165452,
+   "pnl_pct": -0.2680567785956933,
    "cash_usdt": 5068.197692307692,
    "fees_usdt": 0.2025253823099977,
    "realized_usdt": 0.0,
@@ -541,8 +541,8 @@
     "btc": 0.0026289119109816623,
     "entry": 77037.72099171352,
     "stop": null,
-    "value_usdt": 189.03808890212724,
-    "unrealized_pct": -6.659557065901978
+    "value_usdt": 188.88206298021046,
+    "unrealized_pct": -6.73659724730401
    },
    "pending": null,
    "halted": false,
@@ -571,16 +571,16 @@
     "avg_loss_usdt": 0.0,
     "fees_pct_of_gross": null,
     "fees_usdt": 0.2025253823099977,
-    "sortino": -9.204188803901545,
+    "sortino": -9.305506906692058,
     "monthly_returns_pct": {
-     "2026-11": -0.2651010935249998
+     "2026-11": -0.2680567785956933
     }
    },
    "tf": "1h",
    "group": "v2",
    "badge": "Benchmark",
-   "hold_same_window_pct": -5.809943913226268,
-   "excess_vs_hold_pct": 5.544842819701268
+   "hold_same_window_pct": -5.934474551946456,
+   "excess_vs_hold_pct": 5.666417773350763
   }
  ],
  "recent_trades": [
